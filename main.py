@@ -2,12 +2,18 @@ import os
 import re
 import subprocess
 import configparser
+import logging
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
+
+# Logging ayarları
+logging.basicConfig(filename='~/.cache/ulauncher_zen_profiles.log',
+                   level=logging.DEBUG,
+                   format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ZenProfileExtension(Extension):
     def __init__(self):
@@ -21,42 +27,89 @@ class KeywordQueryEventListener(EventListener):
         self.profiles = []
 
     def get_profiles(self, config_folder):
-        config = configparser.ConfigParser()
-        config.read(os.path.join(config_folder, 'profiles.ini'))
-        regex = r'^Profile.*$'
-        return [config[p]['Name'] for p in config.sections() if 'Name' in config[p] and re.search(regex, p, re.IGNORECASE)]
+        try:
+            logging.debug(f"Reading profiles from: {config_folder}")
+            config = configparser.ConfigParser()
+            profiles_ini = os.path.join(config_folder, 'profiles.ini')
+            logging.debug(f"Profiles.ini path: {profiles_ini}")
+            
+            if not os.path.exists(profiles_ini):
+                logging.error(f"profiles.ini not found at {profiles_ini}")
+                return []
+                
+            config.read(profiles_ini)
+            logging.debug(f"Sections in profiles.ini: {config.sections()}")
+            
+            regex = r'^Profile.*$'
+            profiles = []
+            for p in config.sections():
+                if 'Name' in config[p] and re.search(regex, p, re.IGNORECASE):
+                    profile_name = config[p]['Name']
+                    logging.debug(f"Found profile: {profile_name}")
+                    profiles.append(profile_name)
+            
+            return profiles
+        except Exception as e:
+            logging.error(f"Error reading profiles: {str(e)}")
+            return []
 
     def on_event(self, event, extension):
-        query = event.get_argument()
-        if not query or len(self.profiles) == 0:
-            config_folder = os.path.expanduser(extension.preferences['zen_path'])
-            self.profiles = self.get_profiles(config_folder)
-        
-        profiles = self.profiles.copy()
-        if query:
-            query = query.strip().lower()
-            profiles = [p for p in profiles if query in p.lower()]
+        try:
+            query = event.get_argument()
+            logging.debug(f"Query received: {query}")
+            
+            if not query or len(self.profiles) == 0:
+                config_folder = os.path.expanduser(extension.preferences['zen_folder'])
+                logging.debug(f"Config folder: {config_folder}")
+                self.profiles = self.get_profiles(config_folder)
+                logging.debug(f"Found profiles: {self.profiles}")
+            
+            profiles = self.profiles.copy()
+            if query:
+                query = query.strip().lower()
+                profiles = [p for p in profiles if query in p.lower()]
+                logging.debug(f"Filtered profiles: {profiles}")
 
-        entries = []
-        for profile in profiles:
-            entries.append(ExtensionResultItem(
-                icon='assets/icon.png',
-                name=profile,
-                on_enter=ExtensionCustomAction(profile, keep_app_open=False)
-            ))
-        
-        entries.append(ExtensionResultItem(
-            icon='assets/icon.png',
-            name='Profile Management',
-            description='Start Zen profile management tool',
-            on_enter=ExtensionCustomAction('', keep_app_open=False)
-        ))
-        
-        return RenderResultListAction(entries)
+            entries = []
+            for profile in profiles:
+                entries.append(ExtensionResultItem(
+                    icon='images/icon.png',
+                    name=profile,
+                    description=f"Launch Zen with {profile} profile",
+                    on_enter=ExtensionCustomAction(profile, keep_app_open=False)
+                ))
+            
+            if not entries:
+                entries.append(ExtensionResultItem(
+                    icon='images/icon.png',
+                    name='No profiles found',
+                    description='Make sure your profiles.ini path is correct',
+                    on_enter=ExtensionCustomAction('', keep_app_open=False)
+                ))
+            
+            return RenderResultListAction(entries)
+            
+        except Exception as e:
+            logging.error(f"Error in on_event: {str(e)}")
+            return RenderResultListAction([
+                ExtensionResultItem(
+                    icon='images/icon.png',
+                    name='Error occurred',
+                    description=str(e),
+                    on_enter=ExtensionCustomAction('', keep_app_open=False)
+                )
+            ])
 
 class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
-        subprocess.Popen([extension.preferences['zen_exec'], '-p', event.get_data()], start_new_session=True)
+        try:
+            profile = event.get_data()
+            cmd = extension.preferences['zen_cmd']
+            logging.debug(f"Launching Zen with profile: {profile}")
+            logging.debug(f"Command: {cmd} -p {profile}")
+            subprocess.Popen([cmd, '-p', profile], start_new_session=True)
+        except Exception as e:
+            logging.error(f"Error launching Zen: {str(e)}")
 
 if __name__ == '__main__':
     ZenProfileExtension().run()
