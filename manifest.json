@@ -1,8 +1,8 @@
 {
   "required_api_version": "^2.0.0",
-  "name": "Firefox Profiles",
-  "description": "Launch Firefox with an user profile",
-  "developer_name": "Kleber Silva <kleber.swf@gmail.com>",
+  "name": "Zen Profiles",
+  "description": "Launch Zen with an user profile",
+  "developer_name": "Kenan Pelit <kenanpelit@gmail.com>",
   "icon": "images/icon.png",
   "options": {
     "query_debounce": 0.1
@@ -11,23 +11,23 @@
     {
       "id": "keyword",
       "type": "keyword",
-      "name": "Firefox Profile",
-      "description": "The keyword to activate Firefox profile selection",
-      "default_value": "fp"
+      "name": "Zen Profile",
+      "description": "The keyword to activate Zen profile selection",
+      "default_value": "zp"
     },
     {
-      "id": "firefox_folder",
+      "id": "zen_folder",
       "type": "input",
-      "name": "Firefox Configuration Folder",
-      "description": "Select the Firefox profiles folder. Find it inside `about:profiles` page.",
-      "default_value": "~/snap/firefox/common/.mozilla/firefox/"
+      "name": "Zen Configuration Folder",
+      "description": "Select the Zen profiles folder. Find it inside `about:profiles` page.",
+      "default_value": "/"
     },
     {
-      "id": "firefox_cmd",
+      "id": "zen_cmd",
       "type": "input",
-      "name": "Firefox Executable",
-      "description": "The command line to start Firefox. Usually `firefox`.",
-      "default_value": "firefox"
+      "name": "Zen Executable",
+      "description": "The command line to start Zen. Usually `zen`.",
+      "default_value": "zen"
     }
   ]
 }
