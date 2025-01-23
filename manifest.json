@@ -1,7 +1,7 @@
 {
   "required_api_version": "^2.0.0",
   "name": "Zen Profiles",
-  "description": "Launch Zen with an user profile",
+  "description": "Launch Zen with a user profile",
   "developer_name": "Kenan Pelit <kenanpelit@gmail.com>",
   "icon": "images/icon.png",
   "options": {
@@ -19,14 +19,14 @@
       "id": "zen_folder",
       "type": "input",
       "name": "Zen Configuration Folder",
-      "description": "Select the Zen profiles folder. Find it inside `about:profiles` page.",
+      "description": "Select the Zen profiles folder containing profiles.ini",
       "default_value": "~/.zen"
     },
     {
       "id": "zen_cmd",
       "type": "input",
       "name": "Zen Executable",
-      "description": "The command line to start Zen. Usually `zen`.",
+      "description": "The command to start Zen browser",
       "default_value": "zen"
     }
   ]
