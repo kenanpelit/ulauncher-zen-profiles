@@ -20,7 +20,7 @@
       "type": "input",
       "name": "Zen Configuration Folder",
       "description": "Select the Zen profiles folder. Find it inside `about:profiles` page.",
-      "default_value": "/"
+      "default_value": "~/.zen"
     },
     {
       "id": "zen_cmd",
